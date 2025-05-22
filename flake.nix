@@ -165,6 +165,16 @@
                 fi
                 config_path="$(realpath "$config_path")" # TODO maybe remove
 
+                read -r -p "Generate hardware config? [Yes (default), No]: " hardware_config
+                hardware_config=''${hardware_config:-Yes}
+                case "$hardware_config" in
+                  [Yy]|[Yy]es)
+                    sudo nixos-generate-config --show-hardware-config | tee "$config_path"/hardware-configuration.nix
+                    ;;
+                  [Nn]|[Nn]o)
+                    ;;
+                esac
+
                 read -r -p "Update flake inputs? [No (default), All, Select, List]: " update_flake
                 update_flake=''${update_flake:-No}
                 case "$update_flake" in
