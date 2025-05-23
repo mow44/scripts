@@ -188,8 +188,9 @@
                     exit 1
                     ;;
                   [Ll]|[Ll]ist)
-                    read -r -p "Inputs list separated by spaces (e.g nixpkgs home-manager dwm): " flake_inputs
-                    nix flake update "$flake_inputs" --flake "$config_path"
+                    read -r -p "Inputs list separated by spaces (e.g nixpkgs home-manager dwm): " raw_flake_inputs
+                    read -r -a flake_inputs <<< "$raw_flake_inputs"
+                    nix flake update "''${flake_inputs[@]}" --flake "$config_path"
                     ;;
                 esac
 
