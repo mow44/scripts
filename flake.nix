@@ -237,7 +237,7 @@
           '';
         };
 
-        power-menu =
+        powermenu =
           let
             mydmenu = dmenu.defaultPackage.${system};
           in
@@ -267,7 +267,7 @@
             screenshot-save
             screenshot-copy
             system-rebuild
-            power-menu
+            powermenu
             ;
 
           default = pkgs.symlinkJoin {
@@ -276,7 +276,7 @@
               screenshot-save
               screenshot-copy
               system-rebuild
-              power-menu
+              powermenu
             ];
           };
         };
