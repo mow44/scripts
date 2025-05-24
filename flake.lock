@@ -1,5 +1,26 @@
 {
   "nodes": {
+    "dmenu": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1748011482,
+        "narHash": "sha256-l1MCComVQURjTeZAfsxPOlU8spXGV7UTqA0kKwaSM14=",
+        "owner": "mow44",
+        "repo": "dmenu",
+        "rev": "d33926ef1e487a6d07e694198fd74029d2e6e02e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mow44",
+        "ref": "main",
+        "repo": "dmenu",
+        "type": "github"
+      }
+    },
     "flake-utils": {
       "inputs": {
         "systems": "systems"
@@ -36,6 +57,7 @@
     },
     "root": {
       "inputs": {
+        "dmenu": "dmenu",
         "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs"
       }

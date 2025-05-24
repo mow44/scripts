@@ -4,6 +4,11 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+
+    dmenu = {
+      url = "github:mow44/dmenu/main";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -11,6 +16,7 @@
       self,
       nixpkgs,
       flake-utils,
+      dmenu,
     }:
     flake-utils.lib.eachDefaultSystem (
       system:
@@ -139,6 +145,7 @@
             figlet
             coreutils
             nh
+            git
           ];
           text = ''
             figlet "#$HOSTNAME"
@@ -229,6 +236,30 @@
             esac
           '';
         };
+
+        power-menu =
+          let
+            mydmenu = dmenu.defaultPackage.${system};
+          in
+          pkgs.writeShellApplication {
+            name = "powermenu";
+            runtimeInputs = with pkgs; [
+              mydmenu
+              coreutils
+              systemd
+            ];
+            text = ''
+              option=$(echo -e "Shutdown\nReboot" | dmenu -i)
+              case "$option" in
+                Shutdown)
+                  systemctl poweroff
+                  ;;
+                Reboot)
+                  systemctl reboot
+                  ;;
+              esac
+            '';
+          };
       in
       {
         packages = {
@@ -236,6 +267,7 @@
             screenshot-save
             screenshot-copy
             system-rebuild
+            power-menu
             ;
 
           default = pkgs.symlinkJoin {
@@ -244,6 +276,7 @@
               screenshot-save
               screenshot-copy
               system-rebuild
+              power-menu
             ];
           };
         };
