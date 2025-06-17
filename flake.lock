@@ -1,5 +1,29 @@
 {
   "nodes": {
+    "catclock": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1750152718,
+        "narHash": "sha256-823hJoDjXME2bJovvYazspe3rC9OBobmu00f0r304wo=",
+        "owner": "mow44",
+        "repo": "catclock",
+        "rev": "9d5e7b076d1c77b5d41ece792f1870aee8bc95f3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mow44",
+        "ref": "main",
+        "repo": "catclock",
+        "type": "github"
+      }
+    },
     "dmenu": {
       "inputs": {
         "nixpkgs": [
@@ -57,9 +81,11 @@
     },
     "root": {
       "inputs": {
+        "catclock": "catclock",
         "dmenu": "dmenu",
         "flake-utils": "flake-utils",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "uxn11": "uxn11"
       }
     },
     "systems": {
@@ -74,6 +100,30 @@
       "original": {
         "owner": "nix-systems",
         "repo": "default",
+        "type": "github"
+      }
+    },
+    "uxn11": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1750150715,
+        "narHash": "sha256-sYM7qpX4+/Zh15XvSKDhizz685YMGGhT3tsTEAKhWWY=",
+        "owner": "mow44",
+        "repo": "uxn11",
+        "rev": "5f5a53504335649d544884bf9898fb8dd0d5fc70",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mow44",
+        "ref": "main",
+        "repo": "uxn11",
         "type": "github"
       }
     }

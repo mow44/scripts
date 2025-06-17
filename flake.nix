@@ -5,6 +5,22 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
 
+    uxn11 = {
+      url = "github:mow44/uxn11/main";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
+    };
+
+    catclock = {
+      url = "github:mow44/catclock/main";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
+    };
+
     dmenu = {
       url = "github:mow44/dmenu/main";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -13,10 +29,12 @@
 
   outputs =
     {
-      self,
       nixpkgs,
       flake-utils,
+      uxn11,
+      catclock,
       dmenu,
+      ...
     }:
     flake-utils.lib.eachDefaultSystem (
       system:
@@ -260,6 +278,21 @@
               esac
             '';
           };
+
+        uxn-catclock =
+          let
+            u11 = uxn11.packages.x86_64-linux.default;
+            cc = catclock.packages.x86_64-linux.default;
+          in
+          pkgs.writeShellApplication {
+            name = "uxn-catclock";
+            runtimeInputs = [
+              u11
+            ];
+            text = ''
+              uxn11 ${cc}/bin/catclock.rom
+            '';
+          };
       in
       {
         packages = {
@@ -268,6 +301,7 @@
             screenshot-copy
             system-rebuild
             powermenu
+            uxn-catclock
             ;
 
           default = pkgs.symlinkJoin {
@@ -277,6 +311,7 @@
               screenshot-copy
               system-rebuild
               powermenu
+              uxn-catclock
             ];
           };
         };
