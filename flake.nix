@@ -29,6 +29,14 @@
       };
     };
 
+    noodle = {
+      url = "github:mow44/noodle/main";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
+    };
+
     dmenu = {
       url = "github:mow44/dmenu/main";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -42,6 +50,7 @@
       uxn11,
       catclock,
       calendar,
+      noodle,
       dmenu,
       ...
     }:
@@ -324,6 +333,23 @@
               '';
             };
 
+          uxn-noodle =
+            let
+              u11 = uxn11.packages.x86_64-linux.default;
+              noo = noodle.packages.x86_64-linux.default;
+            in
+            pkgs.writeShellApplication {
+              name = "uxn-noodle";
+              runtimeInputs = [
+                pkgs.util-linux
+                u11
+              ];
+              text = ''
+                # NOTE script provides a proper pseudo-terminal to uxn11 for low cpu usage
+                script -q -c "uxn11 ${noo}/bin/noodle.rom" /dev/null
+              '';
+            };
+
           default = pkgs.symlinkJoin {
             name = "useful-scripts";
             paths = [
@@ -333,6 +359,7 @@
               powermenu
               uxn-catclock
               uxn-calendar
+              uxn-noodle
             ];
           };
         };
