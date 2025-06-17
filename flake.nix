@@ -5,14 +5,6 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
 
-    themes = {
-      url = "github:mow44/themes/main";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        flake-utils.follows = "flake-utils";
-      };
-    };
-
     uxn11 = {
       url = "github:mow44/uxn11/main";
       inputs = {
@@ -26,7 +18,6 @@
       inputs = {
         nixpkgs.follows = "nixpkgs";
         flake-utils.follows = "flake-utils";
-        themes.follows = "themes";
       };
     };
 

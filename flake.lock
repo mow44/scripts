@@ -110,6 +110,7 @@
         "dmenu": "dmenu",
         "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs",
+        "themes": "themes",
         "uxn11": "uxn11"
       }
     },
@@ -125,6 +126,30 @@
       "original": {
         "owner": "nix-systems",
         "repo": "default",
+        "type": "github"
+      }
+    },
+    "themes": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1750180758,
+        "narHash": "sha256-RyZQhBv0eXjK71OBfMMSfhhsQrPkWeylVeLqL9jnWRI=",
+        "owner": "mow44",
+        "repo": "themes",
+        "rev": "a7d9c3f3aae8c85b819d8f074358d463957287dd",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mow44",
+        "ref": "main",
+        "repo": "themes",
         "type": "github"
       }
     },
