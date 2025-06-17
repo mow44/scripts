@@ -291,8 +291,7 @@
               u11
             ];
             text = ''
-              # exec uxn11 ${cc}/bin/catclock.rom
-              # setsid uxn11 ${cc}/bin/catclock.rom >/dev/null 2>&1 < /dev/null &
+              # script provides a proper pseudo-terminal to uxn11 for low cpu usage
               script -q -c "uxn11 ${cc}/bin/catclock.rom" /dev/null
             '';
           };
