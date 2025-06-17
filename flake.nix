@@ -290,7 +290,7 @@
               u11
             ];
             text = ''
-              uxn11 ${cc}/bin/catclock.rom
+              exec uxn11 ${cc}/bin/catclock.rom
             '';
           };
       in
