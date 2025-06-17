@@ -1,5 +1,29 @@
 {
   "nodes": {
+    "calendar": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1750178948,
+        "narHash": "sha256-Vi2fM5dQUVH6sJQcTWfDo6sBftWVk6WzfKZ+hi8jF50=",
+        "owner": "mow44",
+        "repo": "calendar",
+        "rev": "ec0b595645fdf4049fed3966fa58a27c3c4a5201",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mow44",
+        "ref": "main",
+        "repo": "calendar",
+        "type": "github"
+      }
+    },
     "catclock": {
       "inputs": {
         "flake-utils": [
@@ -81,6 +105,7 @@
     },
     "root": {
       "inputs": {
+        "calendar": "calendar",
         "catclock": "catclock",
         "dmenu": "dmenu",
         "flake-utils": "flake-utils",
