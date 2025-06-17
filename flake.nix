@@ -50,95 +50,96 @@
       let
         pkgs = import nixpkgs { inherit system; };
 
-        packages = rec {
-          # NOTE dirty hack to get interactive shell in writeShellApplication
-          # Actually this is writeShellApplication implementation from
-          # https://github.com/NixOS/nixpkgs/blob/master/pkgs/build-support/trivial-builders/default.nix
-          # with selectable shell
-          writeWithShellApplication =
-            {
-              name,
-              shell ? "${pkgs.stdenv.shell}", # TODO make a pull request?
-              text,
-              runtimeInputs ? [ ],
-              runtimeEnv ? null,
-              meta ? { },
-              passthru ? { },
-              checkPhase ? null,
-              excludeShellChecks ? [ ],
-              extraShellCheckFlags ? [ ],
-              bashOptions ? [
-                "errexit"
-                "nounset"
-                "pipefail"
-              ],
-              derivationArgs ? { },
-              inheritPath ? true,
-            }:
-            with pkgs;
-            pkgs.writeTextFile {
-              inherit
-                name
-                meta
-                passthru
-                derivationArgs
-                ;
-              executable = true;
-              destination = "/bin/${name}";
-              allowSubstitutes = true;
-              preferLocalBuild = false;
-              text =
-                ''
-                  #!${shell}
-                  ${lib.concatMapStringsSep "\n" (option: "set -o ${option}") bashOptions}
-                ''
-                + lib.optionalString (runtimeEnv != null) (
-                  lib.concatStrings (
-                    lib.mapAttrsToList (name: value: ''
-                      ${lib.toShellVar name value}
-                      export ${name}
-                    '') runtimeEnv
-                  )
+        # NOTE dirty hack to get interactive shell in writeShellApplication
+        # Actually this is writeShellApplication implementation from
+        # https://github.com/NixOS/nixpkgs/blob/master/pkgs/build-support/trivial-builders/default.nix
+        # with selectable shell
+        writeWithShellApplication =
+          {
+            name,
+            shell ? "${pkgs.stdenv.shell}", # TODO make a pull request?
+            text,
+            runtimeInputs ? [ ],
+            runtimeEnv ? null,
+            meta ? { },
+            passthru ? { },
+            checkPhase ? null,
+            excludeShellChecks ? [ ],
+            extraShellCheckFlags ? [ ],
+            bashOptions ? [
+              "errexit"
+              "nounset"
+              "pipefail"
+            ],
+            derivationArgs ? { },
+            inheritPath ? true,
+          }:
+          with pkgs;
+          pkgs.writeTextFile {
+            inherit
+              name
+              meta
+              passthru
+              derivationArgs
+              ;
+            executable = true;
+            destination = "/bin/${name}";
+            allowSubstitutes = true;
+            preferLocalBuild = false;
+            text =
+              ''
+                #!${shell}
+                ${lib.concatMapStringsSep "\n" (option: "set -o ${option}") bashOptions}
+              ''
+              + lib.optionalString (runtimeEnv != null) (
+                lib.concatStrings (
+                  lib.mapAttrsToList (name: value: ''
+                    ${lib.toShellVar name value}
+                    export ${name}
+                  '') runtimeEnv
                 )
-                + lib.optionalString (runtimeInputs != [ ]) ''
+              )
+              + lib.optionalString (runtimeInputs != [ ]) ''
 
-                  export PATH="${lib.makeBinPath runtimeInputs}${lib.optionalString inheritPath ":$PATH"}"
-                ''
-                + ''
+                export PATH="${lib.makeBinPath runtimeInputs}${lib.optionalString inheritPath ":$PATH"}"
+              ''
+              + ''
 
-                  ${text}
+                ${text}
+              '';
+
+            checkPhase =
+              # GHC (=> shellcheck) isn't supported on some platforms (such as risc-v)
+              # but we still want to use writeShellApplication on those platforms
+              let
+                shellcheckSupported =
+                  lib.meta.availableOn stdenv.buildPlatform shellcheck-minimal.compiler
+                  && (builtins.tryEval shellcheck-minimal.compiler.outPath).success;
+                excludeFlags = lib.optionals (excludeShellChecks != [ ]) [
+                  "--exclude"
+                  (lib.concatStringsSep "," excludeShellChecks)
+                ];
+                shellcheckCommand = lib.optionalString shellcheckSupported ''
+                  # use shellcheck which does not include docs
+                  # pandoc takes long to build and documentation isn't needed for just running the cli
+                  ${lib.getExe shellcheck-minimal} ${
+                    lib.escapeShellArgs (excludeFlags ++ extraShellCheckFlags)
+                  } "$target"
                 '';
-
-              checkPhase =
-                # GHC (=> shellcheck) isn't supported on some platforms (such as risc-v)
-                # but we still want to use writeShellApplication on those platforms
-                let
-                  shellcheckSupported =
-                    lib.meta.availableOn stdenv.buildPlatform shellcheck-minimal.compiler
-                    && (builtins.tryEval shellcheck-minimal.compiler.outPath).success;
-                  excludeFlags = lib.optionals (excludeShellChecks != [ ]) [
-                    "--exclude"
-                    (lib.concatStringsSep "," excludeShellChecks)
-                  ];
-                  shellcheckCommand = lib.optionalString shellcheckSupported ''
-                    # use shellcheck which does not include docs
-                    # pandoc takes long to build and documentation isn't needed for just running the cli
-                    ${lib.getExe shellcheck-minimal} ${
-                      lib.escapeShellArgs (excludeFlags ++ extraShellCheckFlags)
-                    } "$target"
-                  '';
-                in
-                if checkPhase == null then
-                  ''
-                    runHook preCheck
-                    ${stdenv.shellDryRun} "$target"
-                    ${shellcheckCommand}
-                    runHook postCheck
-                  ''
-                else
-                  checkPhase;
-            };
-
+              in
+              if checkPhase == null then
+                ''
+                  runHook preCheck
+                  ${stdenv.shellDryRun} "$target"
+                  ${shellcheckCommand}
+                  runHook postCheck
+                ''
+              else
+                checkPhase;
+          };
+      in
+      {
+        packages = rec {
           screenshot-save = pkgs.writeShellApplication {
             name = "screenshot-save";
             runtimeInputs = with pkgs; [
@@ -322,22 +323,20 @@
                 script -q -c "uxn11 ${cal}/bin/calendar.rom" /dev/null
               '';
             };
-        };
-      in
-      {
-        packages = packages;
 
-        defaultPackage = pkgs.symlinkJoin {
-          name = "useful-scripts";
-          paths = [
-            packages.screenshot-save
-            packages.screenshot-copy
-            packages.system-rebuild
-            packages.powermenu
-            packages.uxn-catclock
-            packages.uxn-calendar
-          ];
+          default = pkgs.symlinkJoin {
+            name = "useful-scripts";
+            paths = [
+              screenshot-save
+              screenshot-copy
+              system-rebuild
+              powermenu
+              uxn-catclock
+              uxn-calendar
+            ];
+          };
         };
+
       }
     );
 }
