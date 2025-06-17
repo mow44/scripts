@@ -287,10 +287,13 @@
           pkgs.writeShellApplication {
             name = "uxn-catclock";
             runtimeInputs = [
+              pkgs.util-linux
               u11
             ];
             text = ''
-              exec uxn11 ${cc}/bin/catclock.rom
+              # exec uxn11 ${cc}/bin/catclock.rom
+              # setsid uxn11 ${cc}/bin/catclock.rom >/dev/null 2>&1 < /dev/null &
+              script -q -c "uxn11 ${cc}/bin/catclock.rom" /dev/null
             '';
           };
       in
