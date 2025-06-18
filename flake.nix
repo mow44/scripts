@@ -13,6 +13,14 @@
       };
     };
 
+    dexe = {
+      url = "github:mow44/dexe/main";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
+    };
+
     catclock = {
       url = "github:mow44/catclock/main";
       inputs = {
@@ -23,6 +31,14 @@
 
     calendar = {
       url = "github:mow44/calendar/main";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
+    };
+
+    donsol = {
+      url = "github:mow44/donsol/main";
       inputs = {
         nixpkgs.follows = "nixpkgs";
         flake-utils.follows = "flake-utils";
@@ -48,8 +64,10 @@
       nixpkgs,
       flake-utils,
       uxn11,
+      dexe,
       catclock,
       calendar,
+      donsol,
       noodle,
       dmenu,
       ...
@@ -299,6 +317,23 @@
               '';
             };
 
+          uxn-dexe =
+            let
+              u11 = uxn11.packages.x86_64-linux.default;
+              de = dexe.packages.x86_64-linux.default;
+            in
+            pkgs.writeShellApplication {
+              name = "uxn-dexe";
+              runtimeInputs = [
+                pkgs.util-linux
+                u11
+              ];
+              text = ''
+                # NOTE script provides a proper pseudo-terminal to uxn11 for low cpu usage
+                script -q -c "uxn11 ${de}/bin/dexe.rom" /dev/null
+              '';
+            };
+
           uxn-catclock =
             let
               u11 = uxn11.packages.x86_64-linux.default;
@@ -333,6 +368,23 @@
               '';
             };
 
+          uxn-donsol =
+            let
+              u11 = uxn11.packages.x86_64-linux.default;
+              don = donsol.packages.x86_64-linux.default;
+            in
+            pkgs.writeShellApplication {
+              name = "uxn-donsol";
+              runtimeInputs = [
+                pkgs.util-linux
+                u11
+              ];
+              text = ''
+                # NOTE script provides a proper pseudo-terminal to uxn11 for low cpu usage
+                script -q -c "uxn11 ${don}/bin/donsol.rom" /dev/null
+              '';
+            };
+
           uxn-noodle =
             let
               u11 = uxn11.packages.x86_64-linux.default;
@@ -357,8 +409,10 @@
               screenshot-copy
               system-rebuild
               powermenu
+              uxn-dexe
               uxn-catclock
               uxn-calendar
+              uxn-donsol
               uxn-noodle
             ];
           };
