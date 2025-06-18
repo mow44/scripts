@@ -48,6 +48,30 @@
         "type": "github"
       }
     },
+    "dexe": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1750240266,
+        "narHash": "sha256-j/Aj7CPgdx2zFHdWR1Bz7fMlNiMmYQGaxkfGKeMabL0=",
+        "owner": "mow44",
+        "repo": "dexe",
+        "rev": "948d2f78f7f8e402558fa8d5a32d90eab778cf2b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mow44",
+        "ref": "main",
+        "repo": "dexe",
+        "type": "github"
+      }
+    },
     "dmenu": {
       "inputs": {
         "nixpkgs": [
@@ -66,6 +90,30 @@
         "owner": "mow44",
         "ref": "main",
         "repo": "dmenu",
+        "type": "github"
+      }
+    },
+    "donsol": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1750240568,
+        "narHash": "sha256-A3ndnKc/XsBCV0Yhe8CwLq25tRMLdJa2SqAHe3+y6ac=",
+        "owner": "mow44",
+        "repo": "donsol",
+        "rev": "b0eb16595d1558faa5d87f1086172b6dc3d026e2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mow44",
+        "ref": "main",
+        "repo": "donsol",
         "type": "github"
       }
     },
@@ -103,13 +151,40 @@
         "type": "github"
       }
     },
+    "noodle": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1750240704,
+        "narHash": "sha256-EqdUFltzfXPFW95lKxjKENJ3YmEAVDXpxHua6ztYNjQ=",
+        "owner": "mow44",
+        "repo": "noodle",
+        "rev": "cb7f1df5488b753b3b3164d05eece082274e6e00",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mow44",
+        "ref": "main",
+        "repo": "noodle",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "calendar": "calendar",
         "catclock": "catclock",
+        "dexe": "dexe",
         "dmenu": "dmenu",
+        "donsol": "donsol",
         "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs",
+        "noodle": "noodle",
         "uxn11": "uxn11"
       }
     },

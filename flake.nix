@@ -329,8 +329,20 @@
                 u11
               ];
               text = ''
+                if [ $# -lt 1 ]; then
+                  echo "Usage: uxn-dexe <filepath>"
+                  exit 1
+                fi
+
+                filepath="$1"
+
+                if [ ! -f "$filepath" ]; then
+                  echo "Error: File '$filepath' not found"
+                  exit 1
+                fi
+
                 # NOTE script provides a proper pseudo-terminal to uxn11 for low cpu usage
-                script -q -c "uxn11 ${de}/bin/dexe.rom" /dev/null
+                script -q -c "uxn11 ${de}/bin/dexe.rom $filepath" /dev/null
               '';
             };
 
@@ -346,7 +358,6 @@
                 u11
               ];
               text = ''
-                # NOTE script provides a proper pseudo-terminal to uxn11 for low cpu usage
                 script -q -c "uxn11 ${cc}/bin/catclock.rom" /dev/null
               '';
             };
@@ -363,7 +374,6 @@
                 u11
               ];
               text = ''
-                # NOTE script provides a proper pseudo-terminal to uxn11 for low cpu usage
                 script -q -c "uxn11 ${cal}/bin/calendar.rom" /dev/null
               '';
             };
@@ -380,7 +390,6 @@
                 u11
               ];
               text = ''
-                # NOTE script provides a proper pseudo-terminal to uxn11 for low cpu usage
                 script -q -c "uxn11 ${don}/bin/donsol.rom" /dev/null
               '';
             };
@@ -397,8 +406,13 @@
                 u11
               ];
               text = ''
-                # NOTE script provides a proper pseudo-terminal to uxn11 for low cpu usage
-                script -q -c "uxn11 ${noo}/bin/noodle.rom" /dev/null
+                if [ $# -ge 1 ]; then
+                  filepath="$1"
+                else
+                  filepath=""
+                fi
+
+                script -q -c "uxn11 ${noo}/bin/noodle.rom $filepath" /dev/null
               '';
             };
 
