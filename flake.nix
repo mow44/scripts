@@ -5,6 +5,11 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
 
+    locker = {
+      url = "github:mow44/locker/main";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     uxn11 = {
       url = "github:mow44/uxn11/main";
       inputs = {
@@ -63,6 +68,7 @@
     {
       nixpkgs,
       flake-utils,
+      locker,
       uxn11,
       dexe,
       catclock,
@@ -194,104 +200,110 @@
             '';
           };
 
-          system-rebuild = writeWithShellApplication {
-            name = "system-rebuild";
-            shell = "${pkgs.bash}/bin/bash -i";
-            runtimeInputs = with pkgs; [
-              figlet
-              coreutils
-              nh
-              git
-            ];
-            text = ''
-              figlet "#$HOSTNAME"
+          system-rebuild =
+            let
+              _locker = locker.defaultPackage.x86_64-linux;
+            in
+            writeWithShellApplication {
+              name = "system-rebuild";
+              shell = "${pkgs.bash}/bin/bash -i";
+              runtimeInputs = [
+                pkgs.figlet
+                pkgs.coreutils
+                pkgs.nh
+                pkgs.git
+                _locker
+              ];
+              text = ''
+                figlet "#$HOSTNAME"
 
-              read -r -p "Config source [Remote (default), Local]: " config_source
-              config_source=''${config_source:-Github}
-              case "$config_source" in
-                [Rr]|[Rr]emote)
-                  read -r -e -p "Remote path to config: " config_path
-                  read -r -p "Build and activate the new configuration? [Yes (default), No]: " build_and_activate
-                  build_and_activate=''${build_and_activate:-Yes}
-                  case "$build_and_activate" in
-                    [Yy]|[Yy]es)
-                      nh os switch "$config_path"
-                      ;;
-                    [Nn]|[Nn]o)
-                      ;;
-                  esac
-                  ;;
-                [Ll]|[Ll]ocal)
-                  read -r -e -p "Local path to config: " config_path
-                  if [[ "$config_path" == ~* ]]; then
-                    config_path="''${config_path/#\~/$HOME}"
-                  fi
-                  config_path="$(realpath "$config_path")" # TODO maybe remove
+                read -r -p "Config source [Remote (default), Local]: " config_source
+                config_source=''${config_source:-Github}
+                case "$config_source" in
+                  [Rr]|[Rr]emote)
+                    read -r -e -p "Remote path to config: " config_path
+                    read -r -p "Build and activate the new configuration? [Yes (default), No]: " build_and_activate
+                    build_and_activate=''${build_and_activate:-Yes}
+                    case "$build_and_activate" in
+                      [Yy]|[Yy]es)
+                        nh os switch "$config_path"
+                        ;;
+                      [Nn]|[Nn]o)
+                        ;;
+                    esac
+                    ;;
+                  [Ll]|[Ll]ocal)
+                    read -r -e -p "Local path to config: " config_path
+                    if [[ "$config_path" == ~* ]]; then
+                      config_path="''${config_path/#\~/$HOME}"
+                    fi
+                    config_path="$(realpath "$config_path")" # TODO maybe remove
 
-                  read -r -p "Generate hardware config? [Yes (default), No]: " hardware_config
-                  hardware_config=''${hardware_config:-Yes}
-                  case "$hardware_config" in
-                    [Yy]|[Yy]es)
-                      sudo nixos-generate-config --show-hardware-config | tee "$config_path"/hardware-configuration.nix
-                      ;;
-                    [Nn]|[Nn]o)
-                      ;;
-                  esac
+                    read -r -p "Generate hardware config? [Yes (default), No]: " hardware_config
+                    hardware_config=''${hardware_config:-Yes}
+                    case "$hardware_config" in
+                      [Yy]|[Yy]es)
+                        sudo nixos-generate-config --show-hardware-config | tee "$config_path"/hardware-configuration.nix
+                        ;;
+                      [Nn]|[Nn]o)
+                        ;;
+                    esac
 
-                  read -r -p "Update flake inputs? [No (default), All, Select, List]: " update_flake
-                  update_flake=''${update_flake:-No}
-                  case "$update_flake" in
-                    [Nn]|[Nn]o)
-                      ;;
-                    [Aa]|[Aa]ll)
-                      nix flake update --flake "$config_path"
-                      ;;
-                    [Ss]|[Ss]elect)
-                      echo "TODO use locker"
-                      exit 1
-                      ;;
-                    [Ll]|[Ll]ist)
-                      read -r -p "Inputs list separated by spaces (e.g nixpkgs home-manager dwm): " raw_flake_inputs
-                      read -r -a flake_inputs <<< "$raw_flake_inputs"
-                      nix flake update "''${flake_inputs[@]}" --flake "$config_path"
-                      ;;
-                  esac
+                    read -r -p "Update flake inputs? [No (default), All, Select, List]: " update_flake
+                    update_flake=''${update_flake:-No}
+                    case "$update_flake" in
+                      [Nn]|[Nn]o)
+                        ;;
+                      [Aa]|[Aa]ll)
+                        nix flake update --flake "$config_path"
+                        ;;
+                      [Ss]|[Ss]elect)
+                        raw_flake_inputs=$(${_locker}/bin/locker -f "$config_path/flake.lock" -d=100)
+                        read -r -a flake_inputs <<< "$raw_flake_inputs"
+                        nix flake update "''${flake_inputs[@]}" --flake "$config_path"
+                        ;;
+                      [Ll]|[Ll]ist)
+                        read -r -p "Inputs list separated by spaces (e.g nixpkgs home-manager dwm): " raw_flake_inputs
+                        read -r -a flake_inputs <<< "$raw_flake_inputs"
+                        nix flake update "''${flake_inputs[@]}" --flake "$config_path"
+                        ;;
+                    esac
 
-                  read -r -p "Build and activate the new configuration? [Yes (default), No]: " build_and_activate
-                  build_and_activate=''${build_and_activate:-Yes}
-                  case "$build_and_activate" in
-                    [Yy]|[Yy]es)
-                      nh os switch "$config_path"
-                      ;;
-                    [Nn]|[Nn]o)
-                      ;;
-                  esac
+                    read -r -p "Build and activate the new configuration? [Yes (default), No]: " build_and_activate
+                    build_and_activate=''${build_and_activate:-Yes}
+                    case "$build_and_activate" in
+                      [Yy]|[Yy]es)
+                        nh os switch "$config_path"
+                        ;;
+                      [Nn]|[Nn]o)
+                        ;;
+                    esac
 
-                  read -r -p "Commit and push? [No (default), Yes]: " commit_and_push
-                  commit_and_push=''${commit_and_push:-No}
-                  case "$commit_and_push" in
-                    [Nn]|[Nn]o)
-                      ;;
-                    [Yy]|[Yy]es)
-                      git -C "$config_path" fetch
-                      git -C "$config_path" diff -U0 main origin/main
-                      git -C "$config_path" add -A
+                    read -r -p "Commit and push? [No (default), Yes]: " commit_and_push
+                    commit_and_push=''${commit_and_push:-No}
+                    case "$commit_and_push" in
+                      [Nn]|[Nn]o)
+                        ;;
+                      [Yy]|[Yy]es)
+                        git -C "$config_path" fetch
+                        git -C "$config_path" diff -U0 main origin/main
+                        git -C "$config_path" add -A
 
-                      read -r -p "Commit message (current datetime by default): " commit_message
-                      commit_message="''${commit_message:-$(date '+%Y-%m-%d %H:%M:%S')}"
+                        read -r -p "Commit message (current datetime by default): " commit_message
+                        commit_message="''${commit_message:-$(date '+%Y-%m-%d %H:%M:%S')}"
 
-                      git -C "$config_path" commit -m "$commit_message"
-                      git -C "$config_path" push -u origin
-                      ;;
-                  esac
-                  ;;
-                *)
-                  echo "Invalid config source" >&2
-                  exit 1
-                  ;;
-              esac
-            '';
-          };
+                        git -C "$config_path" commit -m "$commit_message"
+                        git -C "$config_path" push -u origin
+                        ;;
+                    esac
+                    ;;
+                  *)
+                    echo "Invalid config source" >&2
+                    exit 1
+                    ;;
+                esac
+              '';
+            };
 
           powermenu =
             let
@@ -317,20 +329,20 @@
               '';
             };
 
-          uxn-dexe =
+          uxn11-dexe =
             let
-              u11 = uxn11.packages.x86_64-linux.default;
-              de = dexe.packages.x86_64-linux.default;
+              _uxn11 = uxn11.packages.x86_64-linux.default;
+              _dexe = dexe.packages.x86_64-linux.default;
             in
             pkgs.writeShellApplication {
-              name = "uxn-dexe";
+              name = "uxn11-dexe";
               runtimeInputs = [
                 pkgs.util-linux
-                u11
+                _uxn11
               ];
               text = ''
                 if [ $# -lt 1 ]; then
-                  echo "Usage: uxn-dexe <filepath>"
+                  echo "Usage: uxn11-dexe <filepath>"
                   exit 1
                 fi
 
@@ -342,68 +354,68 @@
                 fi
 
                 # NOTE script provides a proper pseudo-terminal to uxn11 for low cpu usage
-                script -q -c "uxn11 ${de}/bin/dexe.rom $filepath" /dev/null
+                script -q -c "uxn11 ${_dexe}/bin/dexe.rom $filepath" /dev/null
               '';
             };
 
-          uxn-catclock =
+          uxn11-catclock =
             let
-              u11 = uxn11.packages.x86_64-linux.default;
-              cc = catclock.packages.x86_64-linux.default;
+              _uxn11 = uxn11.packages.x86_64-linux.default;
+              _catclock = catclock.packages.x86_64-linux.default;
             in
             pkgs.writeShellApplication {
-              name = "uxn-catclock";
+              name = "uxn11-catclock";
               runtimeInputs = [
                 pkgs.util-linux
-                u11
+                _uxn11
               ];
               text = ''
-                script -q -c "uxn11 ${cc}/bin/catclock.rom" /dev/null
+                script -q -c "uxn11 ${_catclock}/bin/catclock.rom" /dev/null
               '';
             };
 
-          uxn-calendar =
+          uxn11-calendar =
             let
-              u11 = uxn11.packages.x86_64-linux.default;
-              cal = calendar.packages.x86_64-linux.default;
+              _uxn11 = uxn11.packages.x86_64-linux.default;
+              _calendar = calendar.packages.x86_64-linux.default;
             in
             pkgs.writeShellApplication {
-              name = "uxn-calendar";
+              name = "uxn11-calendar";
               runtimeInputs = [
                 pkgs.util-linux
-                u11
+                _uxn11
               ];
               text = ''
-                script -q -c "uxn11 ${cal}/bin/calendar.rom" /dev/null
+                script -q -c "uxn11 ${_calendar}/bin/calendar.rom" /dev/null
               '';
             };
 
-          uxn-donsol =
+          uxn11-donsol =
             let
-              u11 = uxn11.packages.x86_64-linux.default;
-              don = donsol.packages.x86_64-linux.default;
+              _uxn11 = uxn11.packages.x86_64-linux.default;
+              _donsol = donsol.packages.x86_64-linux.default;
             in
             pkgs.writeShellApplication {
-              name = "uxn-donsol";
+              name = "uxn11-donsol";
               runtimeInputs = [
                 pkgs.util-linux
-                u11
+                _uxn11
               ];
               text = ''
-                script -q -c "uxn11 ${don}/bin/donsol.rom" /dev/null
+                script -q -c "uxn11 ${_donsol}/bin/donsol.rom" /dev/null
               '';
             };
 
-          uxn-noodle =
+          uxn11-noodle =
             let
-              u11 = uxn11.packages.x86_64-linux.default;
-              noo = noodle.packages.x86_64-linux.default;
+              _uxn11 = uxn11.packages.x86_64-linux.default;
+              _noodle = noodle.packages.x86_64-linux.default;
             in
             pkgs.writeShellApplication {
-              name = "uxn-noodle";
+              name = "uxn11-noodle";
               runtimeInputs = [
                 pkgs.util-linux
-                u11
+                _uxn11
               ];
               text = ''
                 if [ $# -ge 1 ]; then
@@ -412,7 +424,7 @@
                   filepath=""
                 fi
 
-                script -q -c "uxn11 ${noo}/bin/noodle.rom $filepath" /dev/null
+                script -q -c "uxn11 ${_noodle}/bin/noodle.rom $filepath" /dev/null
               '';
             };
 
@@ -423,11 +435,11 @@
               screenshot-copy
               system-rebuild
               powermenu
-              uxn-dexe
-              uxn-catclock
-              uxn-calendar
-              uxn-donsol
-              uxn-noodle
+              uxn11-dexe
+              uxn11-catclock
+              uxn11-calendar
+              uxn11-donsol
+              uxn11-noodle
             ];
           };
         };

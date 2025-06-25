@@ -135,6 +135,43 @@
         "type": "github"
       }
     },
+    "import-cargo": {
+      "locked": {
+        "lastModified": 1594305518,
+        "narHash": "sha256-frtArgN42rSaEcEOYWg8sVPMUK+Zgch3c+wejcpX3DY=",
+        "owner": "edolstra",
+        "repo": "import-cargo",
+        "rev": "25d40be4a73d40a2572e0cc233b83253554f06c5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "edolstra",
+        "repo": "import-cargo",
+        "type": "github"
+      }
+    },
+    "locker": {
+      "inputs": {
+        "import-cargo": "import-cargo",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1750868238,
+        "narHash": "sha256-uwOGRrl5XU2ECbIGEvigibM/HKuMu4eorh14M5UAtCM=",
+        "owner": "mow44",
+        "repo": "locker",
+        "rev": "62d90fcceb959adc7230b1077ed5c3c5c30e62d8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mow44",
+        "ref": "main",
+        "repo": "locker",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1749794982,
@@ -183,6 +220,7 @@
         "dmenu": "dmenu",
         "donsol": "donsol",
         "flake-utils": "flake-utils",
+        "locker": "locker",
         "nixpkgs": "nixpkgs",
         "noodle": "noodle",
         "uxn11": "uxn11"
