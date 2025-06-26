@@ -7,7 +7,10 @@
 
     locker = {
       url = "github:mow44/locker/main";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
     };
 
     uxn11 = {
@@ -202,7 +205,7 @@
 
           system-rebuild =
             let
-              _locker = locker.defaultPackage.x86_64-linux;
+              _locker = locker.packages.x86_64-linux.default;
             in
             writeWithShellApplication {
               name = "system-rebuild";
