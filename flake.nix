@@ -261,11 +261,10 @@
                         nix flake update --flake "$config_path"
                         ;;
                       [Ss]|[Ss]elect)
-                        raw_flake_inputs=$(${_locker}/bin/locker -f "$config_path/flake.lock" -d=100)
-                        if [ -z "$raw_flake_inputs" ]; then
+                        mapfile -t flake_inputs < <(${_locker}/bin/locker "$config_path/flake.lock" -d=100)
+                        if [[ ''${#flake_inputs[@]} -eq 0 ]]; then
                           echo "No inputs provided"
                         else
-                          read -r -a flake_inputs <<< "$raw_flake_inputs"
                           nix flake update "''${flake_inputs[@]}" --flake "$config_path"
                         fi
                         ;;

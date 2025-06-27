@@ -152,17 +152,20 @@
     },
     "locker": {
       "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
         "import-cargo": "import-cargo",
         "nixpkgs": [
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1750868238,
-        "narHash": "sha256-uwOGRrl5XU2ECbIGEvigibM/HKuMu4eorh14M5UAtCM=",
+        "lastModified": 1751051273,
+        "narHash": "sha256-pBrAbT0GH828NP5Ez8luDO/kEvoKdyn1VRqo5RclX7I=",
         "owner": "mow44",
         "repo": "locker",
-        "rev": "62d90fcceb959adc7230b1077ed5c3c5c30e62d8",
+        "rev": "49a34547bd6d3e220e92decd6401065424b00098",
         "type": "github"
       },
       "original": {
