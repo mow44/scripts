@@ -313,14 +313,14 @@
 
           powermenu =
             let
-              mydmenu = dmenu.defaultPackage.${system};
+              _dmenu = dmenu.packages.${system}.default;
             in
             pkgs.writeShellApplication {
               name = "powermenu";
-              runtimeInputs = with pkgs; [
-                mydmenu
-                coreutils
-                systemd
+              runtimeInputs = [
+                _dmenu
+                pkgs.coreutils
+                pkgs.systemd
               ];
               text = ''
                 option=$(echo -e "Shutdown\nReboot" | dmenu -i)
