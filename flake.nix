@@ -5,6 +5,14 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
 
+    wallpapers = {
+      url = "github:mow44/wallpapers/main";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
+    };
+
     locker = {
       url = "github:mow44/locker/main";
       inputs = {
@@ -71,6 +79,7 @@
     {
       nixpkgs,
       flake-utils,
+      wallpapers,
       locker,
       uxn11,
       dexe,
@@ -205,7 +214,7 @@
 
           system-rebuild =
             let
-              _locker = locker.packages.x86_64-linux.default;
+              _locker = locker.packages.${system}.default;
             in
             writeWithShellApplication {
               name = "system-rebuild";
@@ -337,8 +346,8 @@
 
           uxn11-dexe =
             let
-              _uxn11 = uxn11.packages.x86_64-linux.default;
-              _dexe = dexe.packages.x86_64-linux.default;
+              _uxn11 = uxn11.packages.${system}.default;
+              _dexe = dexe.packages.${system}.default;
             in
             pkgs.writeShellApplication {
               name = "uxn11-dexe";
@@ -366,8 +375,8 @@
 
           uxn11-catclock =
             let
-              _uxn11 = uxn11.packages.x86_64-linux.default;
-              _catclock = catclock.packages.x86_64-linux.default;
+              _uxn11 = uxn11.packages.${system}.default;
+              _catclock = catclock.packages.${system}.default;
             in
             pkgs.writeShellApplication {
               name = "uxn11-catclock";
@@ -382,8 +391,8 @@
 
           uxn11-calendar =
             let
-              _uxn11 = uxn11.packages.x86_64-linux.default;
-              _calendar = calendar.packages.x86_64-linux.default;
+              _uxn11 = uxn11.packages.${system}.default;
+              _calendar = calendar.packages.${system}.default;
             in
             pkgs.writeShellApplication {
               name = "uxn11-calendar";
@@ -398,8 +407,8 @@
 
           uxn11-donsol =
             let
-              _uxn11 = uxn11.packages.x86_64-linux.default;
-              _donsol = donsol.packages.x86_64-linux.default;
+              _uxn11 = uxn11.packages.${system}.default;
+              _donsol = donsol.packages.${system}.default;
             in
             pkgs.writeShellApplication {
               name = "uxn11-donsol";
@@ -414,8 +423,8 @@
 
           uxn11-noodle =
             let
-              _uxn11 = uxn11.packages.x86_64-linux.default;
-              _noodle = noodle.packages.x86_64-linux.default;
+              _uxn11 = uxn11.packages.${system}.default;
+              _noodle = noodle.packages.${system}.default;
             in
             pkgs.writeShellApplication {
               name = "uxn11-noodle";
@@ -434,6 +443,31 @@
               '';
             };
 
+          set-wallpaper =
+            let
+              _wallpapers = wallpapers.packages.${system}.default;
+            in
+            pkgs.writeShellApplication {
+              name = "set-wallpaper";
+              runtimeInputs = with pkgs; [
+                hsetroot
+                busybox
+              ];
+              text = ''
+                if [ $# -ge 1 ]; then
+                  filepath="$1"
+                  if [ ! -f "$filepath" ]; then
+                    echo "Error: File '$filepath' not found"
+                    exit 1
+                  fi
+                else
+                  filepath="$(find ${_wallpapers} \( -type f -o -type l \) | shuf -n 1)"
+                fi
+
+                hsetroot -fill "$filepath"
+              '';
+            };
+
           default = pkgs.symlinkJoin {
             name = "useful-scripts";
             paths = [
@@ -446,6 +480,7 @@
               uxn11-calendar
               uxn11-donsol
               uxn11-noodle
+              set-wallpaper
             ];
           };
         };
