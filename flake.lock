@@ -74,7 +74,9 @@
     },
     "dmenu": {
       "inputs": {
-        "flake-utils": "flake-utils",
+        "flake-utils": [
+          "flake-utils"
+        ],
         "nixpkgs": [
           "nixpkgs"
         ]
@@ -121,24 +123,6 @@
     "flake-utils": {
       "inputs": {
         "systems": "systems"
-      },
-      "locked": {
-        "lastModified": 1731533236,
-        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
-      }
-    },
-    "flake-utils_2": {
-      "inputs": {
-        "systems": "systems_2"
       },
       "locked": {
         "lastModified": 1731533236,
@@ -241,7 +225,7 @@
         "dexe": "dexe",
         "dmenu": "dmenu",
         "donsol": "donsol",
-        "flake-utils": "flake-utils_2",
+        "flake-utils": "flake-utils",
         "locker": "locker",
         "nixpkgs": "nixpkgs",
         "noodle": "noodle",
@@ -250,21 +234,6 @@
       }
     },
     "systems": {
-      "locked": {
-        "lastModified": 1681028828,
-        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
-        "owner": "nix-systems",
-        "repo": "default",
-        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-systems",
-        "repo": "default",
-        "type": "github"
-      }
-    },
-    "systems_2": {
       "locked": {
         "lastModified": 1681028828,
         "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
@@ -313,11 +282,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1751128958,
-        "narHash": "sha256-vWJQeaVBvyq1pGdTTq8qwuyrBhWHuY4L8KjbhOChhsU=",
+        "lastModified": 1751140024,
+        "narHash": "sha256-uGR/KKVxmFrM72jSBmzs6HDTLwcn3nHET2OM+q4KdiI=",
         "owner": "mow44",
         "repo": "wallpapers",
-        "rev": "fbd2d30367e04eb66f42c8ef3bdbe2d028384435",
+        "rev": "4abdd23d5816fbcb0318d9491306d4c52ebbd2b4",
         "type": "github"
       },
       "original": {

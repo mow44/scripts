@@ -71,7 +71,10 @@
 
     dmenu = {
       url = "github:mow44/dmenu/main";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
     };
   };
 
@@ -270,12 +273,7 @@
                         nix flake update --flake "$config_path"
                         ;;
                       [Ss]|[Ss]elect)
-                        mapfile -t flake_inputs < <(${_locker}/bin/locker "$config_path/flake.lock" -d=100)
-                        if [[ ''${#flake_inputs[@]} -eq 0 ]]; then
-                          echo "No inputs provided"
-                        else
-                          nix flake update "''${flake_inputs[@]}" --flake "$config_path"
-                        fi
+                        ${update-flake}/bin/update-flake "$config_path"
                         ;;
                       [Ll]|[Ll]ist)
                         read -r -p "Inputs list separated by spaces (e.g nixpkgs home-manager dwm): " raw_flake_inputs
@@ -468,6 +466,38 @@
               '';
             };
 
+          update-flake =
+            let
+              _locker = locker.packages.${system}.default;
+            in
+            pkgs.writeShellApplication {
+              name = "update-flake";
+              runtimeInputs = [
+                pkgs.coreutils
+                _locker
+              ];
+              text = ''
+                if [ $# -ge 1 ]; then
+                  directory="$1"
+                else
+                  directory="$PWD"
+                fi
+
+                if [ ! -f "$directory/flake.lock" ]; then
+                  echo "Error: File '$directory/flake.lock' not found"
+                  exit 1
+                fi
+
+                mapfile -t flake_inputs < <(locker "$directory/flake.lock" -d=100)
+
+                if [[ ''${#flake_inputs[@]} -eq 0 ]]; then
+                  echo "No inputs provided"
+                else
+                  nix flake update "''${flake_inputs[@]}" --flake "$directory"
+                fi
+              '';
+            };
+
           default = pkgs.symlinkJoin {
             name = "useful-scripts";
             paths = [
@@ -481,6 +511,7 @@
               uxn11-donsol
               uxn11-noodle
               set-wallpaper
+              update-flake
             ];
           };
         };
