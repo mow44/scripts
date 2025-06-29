@@ -215,108 +215,103 @@
             '';
           };
 
-          system-rebuild =
-            let
-              _locker = locker.packages.${system}.default;
-            in
-            writeWithShellApplication {
-              name = "system-rebuild";
-              shell = "${pkgs.bash}/bin/bash -i";
-              runtimeInputs = [
-                pkgs.figlet
-                pkgs.coreutils
-                pkgs.nh
-                pkgs.git
-                _locker
-              ];
-              text = ''
-                figlet "#$HOSTNAME"
+          system-rebuild = writeWithShellApplication {
+            name = "system-rebuild";
+            shell = "${pkgs.bash}/bin/bash -i";
+            runtimeInputs = with pkgs; [
+              figlet
+              coreutils
+              nh
+              git
+            ];
+            text = ''
+              figlet "#$HOSTNAME"
 
-                read -r -p "Config source [Remote (default), Local]: " config_source
-                config_source=''${config_source:-Github}
-                case "$config_source" in
-                  [Rr]|[Rr]emote)
-                    read -r -e -p "Remote path to config: " config_path
-                    read -r -p "Build and activate the new configuration? [Yes (default), No]: " build_and_activate
-                    build_and_activate=''${build_and_activate:-Yes}
-                    case "$build_and_activate" in
-                      [Yy]|[Yy]es)
-                        nh os switch "$config_path"
-                        ;;
-                      [Nn]|[Nn]o)
-                        ;;
-                    esac
-                    ;;
-                  [Ll]|[Ll]ocal)
-                    read -r -e -p "Local path to config: " config_path
-                    if [[ "$config_path" == ~* ]]; then
-                      config_path="''${config_path/#\~/$HOME}"
-                    fi
-                    config_path="$(realpath "$config_path")" # TODO maybe remove
+              read -r -p "Config source [Remote (default), Local]: " config_source
+              config_source=''${config_source:-Github}
+              case "$config_source" in
+                [Rr]|[Rr]emote)
+                  read -r -e -p "Remote path to config: " config_path
+                  read -r -p "Build and activate the new configuration? [Yes (default), No]: " build_and_activate
+                  build_and_activate=''${build_and_activate:-Yes}
+                  case "$build_and_activate" in
+                    [Yy]|[Yy]es)
+                      nh os switch "$config_path"
+                      ;;
+                    [Nn]|[Nn]o)
+                      ;;
+                  esac
+                  ;;
+                [Ll]|[Ll]ocal)
+                  read -r -e -p "Local path to config: " config_path
+                  if [[ "$config_path" == ~* ]]; then
+                    config_path="''${config_path/#\~/$HOME}"
+                  fi
+                  config_path="$(realpath "$config_path")" # TODO maybe remove
 
-                    read -r -p "Generate hardware config? [Yes (default), No]: " hardware_config
-                    hardware_config=''${hardware_config:-Yes}
-                    case "$hardware_config" in
-                      [Yy]|[Yy]es)
-                        sudo nixos-generate-config --show-hardware-config | tee "$config_path"/hardware-configuration.nix
-                        ;;
-                      [Nn]|[Nn]o)
-                        ;;
-                    esac
+                  read -r -p "Generate hardware config? [Yes (default), No]: " hardware_config
+                  hardware_config=''${hardware_config:-Yes}
+                  case "$hardware_config" in
+                    [Yy]|[Yy]es)
+                      sudo nixos-generate-config --show-hardware-config | tee "$config_path"/hardware-configuration.nix
+                      ;;
+                    [Nn]|[Nn]o)
+                      ;;
+                  esac
 
-                    read -r -p "Update flake inputs? [No (default), All, Select, List]: " update_flake
-                    update_flake=''${update_flake:-No}
-                    case "$update_flake" in
-                      [Nn]|[Nn]o)
-                        ;;
-                      [Aa]|[Aa]ll)
-                        nix flake update --flake "$config_path"
-                        ;;
-                      [Ss]|[Ss]elect)
-                        ${update-flake}/bin/update-flake "$config_path"
-                        ;;
-                      [Ll]|[Ll]ist)
-                        read -r -p "Inputs list separated by spaces (e.g nixpkgs home-manager dwm): " raw_flake_inputs
-                        read -r -a flake_inputs <<< "$raw_flake_inputs"
-                        nix flake update "''${flake_inputs[@]}" --flake "$config_path"
-                        ;;
-                    esac
+                  read -r -p "Update flake inputs? [No (default), All, Select, List]: " update_flake
+                  update_flake=''${update_flake:-No}
+                  case "$update_flake" in
+                    [Nn]|[Nn]o)
+                      ;;
+                    [Aa]|[Aa]ll)
+                      nix flake update --flake "$config_path"
+                      ;;
+                    [Ss]|[Ss]elect)
+                      ${update-flake}/bin/update-flake "$config_path"
+                      ;;
+                    [Ll]|[Ll]ist)
+                      read -r -p "Inputs list separated by spaces (e.g nixpkgs home-manager dwm): " raw_flake_inputs
+                      read -r -a flake_inputs <<< "$raw_flake_inputs"
+                      nix flake update "''${flake_inputs[@]}" --flake "$config_path"
+                      ;;
+                  esac
 
-                    read -r -p "Build and activate the new configuration? [Yes (default), No]: " build_and_activate
-                    build_and_activate=''${build_and_activate:-Yes}
-                    case "$build_and_activate" in
-                      [Yy]|[Yy]es)
-                        nh os switch "$config_path"
-                        ;;
-                      [Nn]|[Nn]o)
-                        ;;
-                    esac
+                  read -r -p "Build and activate the new configuration? [Yes (default), No]: " build_and_activate
+                  build_and_activate=''${build_and_activate:-Yes}
+                  case "$build_and_activate" in
+                    [Yy]|[Yy]es)
+                      nh os switch "$config_path"
+                      ;;
+                    [Nn]|[Nn]o)
+                      ;;
+                  esac
 
-                    read -r -p "Commit and push? [No (default), Yes]: " commit_and_push
-                    commit_and_push=''${commit_and_push:-No}
-                    case "$commit_and_push" in
-                      [Nn]|[Nn]o)
-                        ;;
-                      [Yy]|[Yy]es)
-                        git -C "$config_path" fetch
-                        git -C "$config_path" diff -U0 main origin/main
-                        git -C "$config_path" add -A
+                  read -r -p "Commit and push? [No (default), Yes]: " commit_and_push
+                  commit_and_push=''${commit_and_push:-No}
+                  case "$commit_and_push" in
+                    [Nn]|[Nn]o)
+                      ;;
+                    [Yy]|[Yy]es)
+                      git -C "$config_path" fetch
+                      git -C "$config_path" diff -U0 main origin/main
+                      git -C "$config_path" add -A
 
-                        read -r -p "Commit message (current datetime by default): " commit_message
-                        commit_message="''${commit_message:-$(date '+%Y-%m-%d %H:%M:%S')}"
+                      read -r -p "Commit message (current datetime by default): " commit_message
+                      commit_message="''${commit_message:-$(date '+%Y-%m-%d %H:%M:%S')}"
 
-                        git -C "$config_path" commit -m "$commit_message"
-                        git -C "$config_path" push -u origin
-                        ;;
-                    esac
-                    ;;
-                  *)
-                    echo "Invalid config source" >&2
-                    exit 1
-                    ;;
-                esac
-              '';
-            };
+                      git -C "$config_path" commit -m "$commit_message"
+                      git -C "$config_path" push -u origin
+                      ;;
+                  esac
+                  ;;
+                *)
+                  echo "Invalid config source" >&2
+                  exit 1
+                  ;;
+              esac
+            '';
+          };
 
           powermenu =
             let
